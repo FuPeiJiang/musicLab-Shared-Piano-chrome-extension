@@ -1,0 +1,12 @@
+{
+  "name": "musicLab Shared-Piano",
+  "version": "0.1",
+  "manifest_version": 3,
+  "content_scripts": [
+    {
+      "run_at": "document_idle",
+      "matches": ["https://musiclab.chromeexperiments.com/Shared-Piano/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
