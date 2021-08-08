@@ -115,48 +115,30 @@ async function main() {
     throw "arr.length!==8"
   }
   const firstShadowRoot = arr[0].shadowRoot
-  const saveQuerySelector = firstShadowRoot.querySelector.bind(firstShadowRoot)
-  await new Promise((resolve) => {
-    loopTime = 0
-    function inner() {
-      setTimeout(() => {
-        if (loopTime < 60) {
-          const element = saveQuerySelector('piano-keyboard-note[note]')
-          console.log(element)
-          console.log(element.getAttribute('note'))
-          // console.log(element.note)
-          element.note!==undefined && resolve()
-          loopTime++, inner()
-        }
-      }, 100)
-    }
-    inner()
-    // 100 * 60
-    // 6 seconds
-  })
 
   for (let o = 0; o < 8; o++) {
-
-    notesArr = arr[o].shadowRoot.querySelectorAll('piano-keyboard-note')
-    for (let n = 0, len = notesArr.length; n < len; n++) {
-      kbNote = notesArr[n]
-      if (kbNote.note !== 0) {
-        kbNote.addEventListener('mouseenter', (note => {
+    const keysArr = arr[o].shadowRoot.querySelectorAll('piano-keyboard-note')
+    for (let n = 0, len = keysArr.length; n < len; n++) {
+      const singleKey = keysArr[n]
+      const keyNote = singleKey.getAttribute('note')
+      
+      if (keyNote !== 0) {
+        singleKey.addEventListener('mouseenter', (note => {
           return () => {
             if (mouseDown) {
               keyToPress = noteToKeyboardKey(note)
               savedArr.push(keyToPress)
             }
           }
-        })(kbNote.note)
+        })(keyNote)
         ) //addEventListener()
 
-        kbNote.addEventListener('mousedown', (note => {
+        singleKey.addEventListener('mousedown', (note => {
           return () => {
             keyToPress = noteToKeyboardKey(note)
             savedArr.push(keyToPress)
           }
-        })(kbNote.note)
+        })(keyNote)
         ) //addEventListener()
       }
     }
@@ -165,21 +147,3 @@ async function main() {
 }
 
 main()
-
-function awaitNote(element) {
-  return new Promise((resolve) => {
-    loopTime = 0
-    function inner() {
-      setTimeout(() => {
-        if (loopTime < 60) {
-          element.note && resolve()
-          loopTime++, inner()
-        }
-      }, 100)
-    }
-    inner()
-    // 100 * 60
-    // 6 seconds
-  })
-
-}
