@@ -111,12 +111,13 @@ async function main() {
     mouseDown--
   })
 
-  if (arr.length !== 8) {
-    throw "arr.length!==8"
-  }
+  // if (arr.length !== 8) {
+    // throw "arr.length!==8"
+  // }
   const firstShadowRoot = arr[0].shadowRoot
 
-  for (let o = 0; o < 8; o++) {
+  // for (let o = 0; o < 8; o++) {
+  for (let o = 0, len = arr.length; o < len; o++) {
     const keysArr = arr[o].shadowRoot.querySelectorAll('piano-keyboard-note')
     for (let n = 0, len = keysArr.length; n < len; n++) {
       const singleKey = keysArr[n]
