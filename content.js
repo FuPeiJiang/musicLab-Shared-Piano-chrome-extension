@@ -77,8 +77,9 @@ function copyTextToClipboard(text) {
 }
 
 
+const noteNumberToKey = ["a", "w", "s", "e", "d", "f", "t", "g", "y", "h", "u", "j"]
+
 function noteToKeyboardKey(note) {
-  obj = { 0: "a", 1: "w", 2: "s", 3: "e", 4: "d", 5: "f", 6: "t", 7: "g", 8: "y", 9: "h", 10: "u", 11: "j" }
 
   finalStr = ""
   whichOctave = Math.floor(note / 12)
@@ -93,7 +94,7 @@ function noteToKeyboardKey(note) {
     finalStr += "x".repeat(octaveVector)
   }
 
-  return finalStr + obj[toObjRangeNote]
+  return finalStr + noteNumberToKey[toObjRangeNote]
 }
 
 async function main() {
@@ -112,39 +113,66 @@ async function main() {
   })
 
   // if (arr.length !== 8) {
-    // throw "arr.length!==8"
+  // throw "arr.length!==8"
   // }
   const firstShadowRoot = arr[0].shadowRoot
+
+  const weakMap_note = new WeakMap()
+  let touchOnWhat
 
   // for (let o = 0; o < 8; o++) {
   for (let o = 0, len = arr.length; o < len; o++) {
     const keysArr = arr[o].shadowRoot.querySelectorAll('piano-keyboard-note')
     for (let n = 0, len = keysArr.length; n < len; n++) {
       const singleKey = keysArr[n]
-      const keyNote = singleKey.getAttribute('note')
-      
-      if (keyNote !== 0) {
-        singleKey.addEventListener('mouseenter', (note => {
-          return () => {
-            if (mouseDown) {
-              keyToPress = noteToKeyboardKey(note)
-              savedArr.push(keyToPress)
-            }
-          }
-        })(keyNote)
-        ) //addEventListener()
+      const keyNote = parseInt(singleKey.getAttribute('note'))
 
-        singleKey.addEventListener('mousedown', (note => {
-          return () => {
-            keyToPress = noteToKeyboardKey(note)
-            savedArr.push(keyToPress)
+      //those "blank" notes in-between the piano
+      if (keyNote !== 0) {
+        //mouse down and enter adjacent key,
+        weakMap_note.set(singleKey, keyNote)
+        function adjacent(event) {
+          if (mouseDown) {
+            same(event.target)
           }
-        })(keyNote)
-        ) //addEventListener()
+        }
+        singleKey.addEventListener('mouseenter', adjacent)
+        singleKey.addEventListener('mousedown', function(event) {
+          same(event.target)
+        })
+        singleKey.addEventListener('touchstart', function (event) {
+          touchOnWhat = event.target
+          same(event.target)
+        })
+
       }
+
     }
 
   }
+  function same(target) {
+    const note = weakMap_note.get(target)
+    keyToPress = noteToKeyboardKey(note)
+    savedArr.push(keyToPress)
+  }
+  kroot.querySelector(".octaves-7").addEventListener('touchmove', function (event) {
+    const bruh1 = document.elementFromPoint(event.touches[0].clientX, event.touches[0].clientY)
+    if (bruh1.nodeName === "PIANO-KEYBOARD") {
+      const bruh2 = bruh1.shadowRoot.elementFromPoint(event.touches[0].clientX, event.touches[0].clientY)
+      if (bruh2.nodeName === "PIANO-KEYBOARD-OCTAVE") {
+        const bruh3 = bruh2.shadowRoot.elementFromPoint(event.touches[0].clientX, event.touches[0].clientY)
+        if (bruh3.nodeName === "PIANO-KEYBOARD-NOTE") {
+          if (bruh3 !== touchOnWhat) {
+            if (bruh3.getAttribute('note') !== "0") {
+              touchOnWhat = bruh3
+              same(bruh3)
+            }
+          }
+        }
+      }
+    }
+  })
+
 }
 
 main()
